@@ -1,0 +1,228 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Define color palette and base styles */
+:root {
+    --primary-color: #00A383; /* A modern teal/green */
+    --secondary-color: #7D49F8; /* A vibrant purple for accents */
+    --background-color: #F8F9FA;
+    --card-background: #FFFFFF;
+    --text-color: #343A40;
+    --heading-color: #212529;
+    --border-color: #E9ECEF;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.7;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Header Styling */
+header {
+    background: linear-gradient(90deg, var(--primary-color), #00C39A);
+    color: white;
+    text-align: center;
+    padding: 3rem 1rem;
+    border-bottom: 4px solid var(--secondary-color);
+}
+
+header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+main {
+    max-width: 1200px;
+    margin: 2.5rem auto;
+    padding: 0 1rem;
+}
+
+/* Card Styling */
+.url-input,
+.results {
+    background: var(--card-background);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 2.5rem;
+}
+
+.url-input h2,
+.results h2 {
+    margin-bottom: 2rem;
+    color: var(--heading-color);
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Form Styling */
+#analysisForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+input[type="url"] {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="url"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 163, 131, 0.15);
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+    background-color: #007A63;
+    transform: translateY(-2px);
+}
+
+/* Distinguish the secondary button */
+#planBtn {
+    background-color: var(--secondary-color);
+}
+#planBtn:hover {
+    background-color: #5D2DB1;
+}
+
+/* Chart Container Styling */
+.chart-container {
+    display: none; /* Hidden by default */
+    justify-content: space-around;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 350px;
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Results Display Styling */
+#resultsContainer h3 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1.5rem 0;
+    color: var(--heading-color);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+#resultsContainer h4 {
+    font-size: 1.2rem;
+    margin: 1.5rem 0 1rem 0;
+    color: #495057;
+    font-weight: 600;
+}
+
+#resultsContainer ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#resultsContainer li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f3f5;
+    word-break: break-all;
+}
+
+/* AI Plan Section Styling */
+.ai-plan-section {
+    background: linear-gradient(to right, #e6fff9, #f3e9ff);
+    border-left: 5px solid var(--primary-color);
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.ai-plan-section ol {
+    padding-left: 20px;
+}
+
+.ai-plan-section li {
+    margin-bottom: 1rem;
+    border: none;
+}
+
+/* Site Comparisons Section */
+.comparison-section {
+    display: flex;
+    justify-content: space-around;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.comparison-section > div {
+    flex: 1;
+    min-width: 250px;
+}
+
+.comparison-section h5 {
+    font-weight: 500;
+    color: #495057;
+    background-color: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+footer {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 2rem;
+    color: #6C757D;
+    background-color: #E9ECEF;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.2rem;
+    }
+    .url-input, .results {
+        padding: 1.5rem;
+    }
+}

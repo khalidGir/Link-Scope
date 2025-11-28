@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Scope - Intelligent SEO & Website Analysis Tool</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Link Scope</h1>
+        <p>Intelligent SEO & Website Analysis Tool</p>
+    </header>
+
+    <main>
+        <section class="url-input">
+            <h2>Link Scope Analysis Tools</h2>
+            <form id="analysisForm">
+                <input type="url" id="userUrl" placeholder="Enter your website URL" required>
+                <input type="url" id="competitorUrl" placeholder="Enter competitor website URL (for SEO plan)">
+                <div class="button-group">
+                    <button type="submit" id="analyzeBtn" name="action" value="analyze">Analyze Site</button>
+                    <button type="submit" id="planBtn" name="action" value="generate-plan">Generate SEO Plan</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="results">
+            <h2>Analysis Results</h2>
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <canvas id="userLinkChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="competitorLinkChart"></canvas>
+                </div>
+            </div>
+            <div id="resultsContainer">
+                <p>Results will appear here after analysis.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Link Scope. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

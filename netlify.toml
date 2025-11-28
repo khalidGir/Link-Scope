@@ -1,0 +1,4 @@
+toml [build]
+commands = ["npm run build"]
+publish = "dist" 
+[headers.values] "cache-control" = "max-age=31536000,immutable"
