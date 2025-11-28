@@ -4,7 +4,7 @@
 
 An advanced web analysis tool that goes beyond simple link scraping. Link Scope provides a comprehensive SEO and content audit of any webpage, identifies key issues, and leverages AI to generate actionable recommendations for improvement.
 
-**Live Demo (Coming Soon):** `[Link to Deployed Application]`
+**Live Demo :** `(https://link-scope.onrender.com/)`
 
 ---
 
@@ -125,7 +125,7 @@ Instructions to get a local copy up and running.
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/your-username/link-scope.git
+    git clone https://github.com/khaidGir/link-scope.git
     cd link-scope
     ```
 
@@ -142,27 +142,6 @@ Instructions to get a local copy up and running.
 
 ---
 
-## 📂 Project Structure (Planned)
-
-The project will be refactored into a more scalable and maintainable structure:
-
-```
-/
-├── public/              # Frontend assets (HTML, CSS, JS)
-├── src/
-│   ├── api/             # API routes
-│   │   └── analyze.js
-│   ├── services/        # Core logic (fetching, parsing, AI)
-│   │   ├── analysisService.js
-│   │   └── aiService.js
-│   └── utils/           # Helper functions
-├── .gitignore
-├── server.js            # Main server entry point
-├── package.json
-└── README.md
-```
-
----
 
 ## License
 
