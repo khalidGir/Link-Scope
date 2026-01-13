@@ -1,4 +1,5 @@
 // Link Scope - Frontend JavaScript
+/* global Chart */
 // Placeholder for frontend logic
 let userChart = null;
 let competitorChart = null;

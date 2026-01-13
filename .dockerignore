@@ -1,0 +1,8 @@
+# Ignore dependencies, git, and local config
+.git
+node_modules
+npm-debug.log
+
+# Ignore this file itself
+.dockerignore
+Dockerfile
