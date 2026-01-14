@@ -1,13 +1,14 @@
-node_modules/
+node_modules/
+*.log
+.DS_Store
+npm-debug.log*
+.nyc_output
+coverage/
+.coverage
+.nyc_output
+.nyc_output/
+coverage/lcov-report/
+# VS Code
+.vscode/
+config.bat
 .env
-*.log
-.DS_Store
-npm-debug.log*
-.nyc_output
-coverage/
-.coverage
-.nyc_output
-.nyc_output/
-coverage/lcov-report/
-# VS Code
-.vscode/
