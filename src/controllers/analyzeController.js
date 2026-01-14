@@ -24,7 +24,7 @@ const analyzeUrl = async (req, res) => {
         res.json({ ...analysis, chartData });
     } catch (error) {
         console.error('Error analyzing URL:', error);
-        res.status(500).json({ error: 'Failed to analyze the URL. It may be invalid, unreachable, or blocking our bot.' });
+        res.status(500).json({ error: error.message || 'Failed to analyze the URL.' });
     }
 };
 
