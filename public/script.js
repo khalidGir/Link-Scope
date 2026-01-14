@@ -71,7 +71,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderDashboard(data, 'single');
                 } else {
                     const err = await res.json();
-                    alert(`Error: ${err.error}`);
+                    if (err.error && err.error.includes('BLOCKED_BY_TARGET')) {
+                        initialState.classList.remove('hidden');
+                        mainGrid.classList.add('hidden');
+                        initialState.innerHTML = `
+                            <div class="text-amber-400 bg-amber-900/10 border border-amber-900/30 p-6 rounded-xl text-center max-w-md mx-auto">
+                                <i class="fas fa-shield-alt text-3xl mb-3"></i>
+                                <h3 class="font-bold text-lg mb-2">Access Denied by Target</h3>
+                                <p class="text-sm text-amber-500/80 mb-4">The website you are trying to analyze has strict anti-bot protections (Cloudflare/Akamai) that block cloud scanners.</p>
+                                <div class="text-xs bg-amber-950/50 p-3 rounded text-amber-300 font-mono">Tip: Try analyzing a personal blog, documentation site, or Wikipedia to test the tool.</div>
+                            </div>
+                        `;
+                    } else {
+                        alert(`Error: ${err.error}`);
+                    }
                 }
             } catch (err) {
                 alert(`Connection Error: ${err.message}`);

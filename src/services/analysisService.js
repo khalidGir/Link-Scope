@@ -53,6 +53,10 @@ const analyzeUrl = async (targetUrl) => {
         }
     });
 
+    if (response.status === 403 || response.status === 429) {
+        throw new Error('BLOCKED_BY_TARGET');
+    }
+
     if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
     }
