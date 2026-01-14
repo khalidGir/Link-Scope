@@ -57,6 +57,12 @@ const analyzeUrl = async (targetUrl) => {
     const html = await response.text();
     const $ = cheerio.load(html);
 
+    // Extract Meta Data
+    const title = $('title').text().trim() || 'No Title Found';
+    const metaDescription = $('meta[name="description"]').attr('content') || 
+                          $('meta[property="og:description"]').attr('content') || 
+                          'No Description Found';
+
     const categorizedLinks = {
         internal: [],
         external: [],
@@ -116,6 +122,10 @@ const analyzeUrl = async (targetUrl) => {
     }
 
     return {
+        meta: {
+            title,
+            description: metaDescription
+        },
         links: categorizedLinks,
         images: images
     };

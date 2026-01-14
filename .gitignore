@@ -5,9 +5,9 @@ node_modules/
 npm-debug.log*
 .nyc_output
 coverage/
-.covernyc_output
+.coverage
 .nyc_output
 .nyc_output/
 coverage/lcov-report/
 # VS Code
-.vscode/git push origin main
+.vscode/

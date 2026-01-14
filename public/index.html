@@ -3,48 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Scope - Intelligent SEO & Website Analysis Tool</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Link Scope - Premium Analytics</title>
+    <!-- Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        .glass-surface {
+            background: rgba(24, 24, 27, 0.4); /* zinc-900/40 */
+            backdrop-filter: blur(24px); /* backdrop-blur-xl */
+            border: 1px solid rgba(39, 39, 42, 0.6); /* zinc-800 */
+        }
+        .shimmer {
+            background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
 </head>
-<body>
-    <header>
-        <h1>Link Scope</h1>
-        <p>Intelligent SEO & Website Analysis Tool</p>
+<body class="bg-[#09090b] min-h-screen text-zinc-400 selection:bg-emerald-500/20 selection:text-emerald-200 flex flex-col">
+
+    <!-- Navbar -->
+    <header class="border-b border-zinc-800/60 bg-[#09090b]/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center">
+                    <i class="fas fa-cube text-emerald-500 text-sm"></i>
+                </div>
+                <h1 class="text-sm font-semibold text-zinc-100 tracking-tight">Link Scope</h1>
+            </div>
+            <nav class="hidden md:block">
+                <ul class="flex gap-8 text-xs font-medium tracking-wide">
+                    <li><a href="#" class="text-zinc-100 hover:text-emerald-400 transition-colors">DASHBOARD</a></li>
+                    <li><a href="#" class="text-zinc-500 hover:text-zinc-300 transition-colors">HISTORY</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <main>
-        <section class="url-input">
-            <h2>Link Scope Analysis Tools</h2>
-            <form id="analysisForm">
-                <input type="url" id="userUrl" placeholder="Enter your website URL" required>
-                <input type="url" id="competitorUrl" placeholder="Enter competitor website URL (for SEO plan)">
-                <div class="button-group">
-                    <button type="submit" id="analyzeBtn" name="action" value="analyze">Analyze Site</button>
-                    <button type="submit" id="planBtn" name="action" value="generate-plan">Generate SEO Plan</button>
-                </div>
-            </form>
+    <main class="container mx-auto px-4 md:px-6 py-8 flex-grow">
+        
+        <!-- Search Input -->
+        <section class="max-w-3xl mx-auto mb-12">
+            <div class="glass-surface rounded-xl p-1.5 shadow-2xl shadow-black/50">
+                <form id="analysisForm" class="flex flex-col sm:flex-row gap-1.5">
+                    <div class="relative flex-grow group">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i class="fas fa-link text-zinc-600 group-focus-within:text-emerald-500 transition-colors text-xs"></i>
+                        </div>
+                        <input type="url" id="userUrl" placeholder="Enter URL to analyze..." required 
+                            class="w-full pl-9 pr-4 py-3 bg-zinc-900/50 rounded-lg text-sm text-zinc-200 placeholder-zinc-600 focus:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all border border-transparent">
+                    </div>
+                    <div class="relative flex-grow group">
+                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i class="fas fa-crosshairs text-zinc-600 group-focus-within:text-amber-500 transition-colors text-xs"></i>
+                        </div>
+                        <input type="url" id="competitorUrl" placeholder="Competitor URL (Optional)" 
+                            class="w-full pl-9 pr-4 py-3 bg-zinc-900/50 rounded-lg text-sm text-zinc-200 placeholder-zinc-600 focus:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-amber-500/50 transition-all border border-transparent">
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button type="submit" name="action" value="analyze" 
+                            class="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg transition-colors border border-zinc-700 whitespace-nowrap">
+                            Analyze
+                        </button>
+                        <button type="submit" name="action" value="generate-plan" 
+                            class="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-zinc-900 text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] whitespace-nowrap flex items-center gap-2">
+                            <i class="fas fa-magic"></i> AI Plan
+                        </button>
+                    </div>
+                </form>
+            </div>
         </section>
 
-        <section class="results">
-            <h2>Analysis Results</h2>
-            <div class="chart-container">
-                <div class="chart-wrapper">
-                    <canvas id="userLinkChart"></canvas>
+        <!-- Empty State -->
+        <div id="initialState" class="flex flex-col items-center justify-center py-24 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-zinc-900/50 border border-zinc-800 flex items-center justify-center mb-6 shadow-xl">
+                <i class="fas fa-chart-pie text-zinc-700 text-2xl"></i>
+            </div>
+            <h2 class="text-zinc-200 font-medium text-lg mb-2 tracking-tight">Analytics Dashboard</h2>
+            <p class="text-zinc-500 text-sm max-w-sm">Enter a URL to visualize traffic distribution. Add a competitor to unlock AI-powered strategic insights.</p>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div id="mainGrid" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            
+            <!-- Left Col: Metrics & Charts -->
+            <div class="space-y-6">
+                <!-- Visual Analytics Card -->
+                <div class="glass-surface rounded-xl p-6 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-zinc-100 text-sm font-semibold tracking-tight">Traffic Distribution</h3>
+                        <!-- Legend -->
+                        <div id="chartLegend" class="flex gap-3">
+                            <!-- Dynamic Legend Items -->
+                        </div>
+                    </div>
+                    
+                    <div class="h-[300px] w-full relative">
+                        <canvas id="mainChart"></canvas>
+                    </div>
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="competitorLinkChart"></canvas>
+
+                <!-- Detailed Metrics Grid -->
+                <div id="metricsGrid" class="grid grid-cols-1 gap-4">
+                    <!-- Metrics Cards Injected Here -->
                 </div>
             </div>
-            <div id="resultsContainer">
-                <p>Results will appear here after analysis.</p>
+
+            <!-- Right Col: AI Strategy -->
+            <div class="glass-surface rounded-xl flex flex-col h-full min-h-[500px] lg:h-auto lg:min-h-[600px] relative">
+                <div class="p-6 border-b border-zinc-800/60 flex justify-between items-center bg-zinc-900/20 backdrop-blur-sm sticky top-0 z-10 rounded-t-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 rounded bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                            <i class="fas fa-robot text-emerald-500 text-xs"></i>
+                        </div>
+                        <h3 class="text-zinc-100 text-sm font-semibold tracking-tight">Strategic Roadmap</h3>
+                    </div>
+                    <button id="copyPlanBtn" class="text-[10px] font-medium text-zinc-500 hover:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 transition-colors">
+                        <i class="far fa-copy"></i> Copy
+                    </button>
+                </div>
+                
+                <div id="aiPlanContent" class="p-6 overflow-y-auto custom-scrollbar flex-grow">
+                    <!-- Default Empty State for AI -->
+                    <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-3">
+                        <i class="fas fa-microchip text-2xl opacity-20"></i>
+                        <p class="text-xs">Run "AI Plan" to generate insights.</p>
+                    </div>
+                </div>
+                
+                <!-- Skeleton Loader (Hidden by default) -->
+                <div id="aiSkeleton" class="hidden p-6 space-y-4 absolute inset-0 top-[60px] bg-[#09090b] z-20">
+                    <div class="h-4 bg-zinc-800/50 rounded w-3/4 shimmer"></div>
+                    <div class="h-4 bg-zinc-800/50 rounded w-1/2 shimmer"></div>
+                    <div class="h-32 bg-zinc-800/50 rounded w-full shimmer mt-6"></div>
+                    <div class="h-4 bg-zinc-800/50 rounded w-5/6 shimmer"></div>
+                </div>
             </div>
-        </section>
+
+        </div>
+
     </main>
-
-    <footer>
-        <p>&copy; 2025 Link Scope. All rights reserved.</p>
-    </footer>
 
     <script src="script.js"></script>
 </body>

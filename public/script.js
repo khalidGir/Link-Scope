@@ -1,323 +1,302 @@
-// Link Scope - Frontend JavaScript
+// Link Scope - Frontend Logic
 /* global Chart */
-// Placeholder for frontend logic
-let userChart = null;
-let competitorChart = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+let chartInstance = null;
+let currentRawPlan = "";
+
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
     const form = document.getElementById('analysisForm');
+    const initialState = document.getElementById('initialState');
+    const mainGrid = document.getElementById('mainGrid');
+    const aiPlanContent = document.getElementById('aiPlanContent');
+    const aiSkeleton = document.getElementById('aiSkeleton');
+    const metricsGrid = document.getElementById('metricsGrid');
+    const copyPlanBtn = document.getElementById('copyPlanBtn');
+    const chartLegend = document.getElementById('chartLegend');
+    
+    // Inputs
     const userUrlInput = document.getElementById('userUrl');
     const competitorUrlInput = document.getElementById('competitorUrl');
-    const resultsContainer = document.getElementById('resultsContainer');
 
-    // Handle form submission
-    form.addEventListener('submit', async function(e) {
+    // --- State Management ---
+    
+    function setViewState(state) {
+        if (state === 'initial') {
+            initialState.classList.remove('hidden');
+            mainGrid.classList.add('hidden');
+        } else if (state === 'active') {
+            initialState.classList.add('hidden');
+            mainGrid.classList.remove('hidden');
+        }
+    }
+
+    function toggleAiLoading(isLoading) {
+        if (isLoading) {
+            aiPlanContent.classList.add('hidden');
+            aiSkeleton.classList.remove('hidden');
+        } else {
+            aiPlanContent.classList.remove('hidden');
+            aiSkeleton.classList.add('hidden');
+        }
+    }
+
+    // --- Form Handling ---
+
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        // Determine which button was clicked
-        const submitter = e.submitter;
-        const action = submitter ? submitter.value : 'analyze';
+        const action = e.submitter ? e.submitter.value : 'analyze';
+        
+        // Validation
+        const userUrl = userUrlInput.value.trim();
+        if (!userUrl) return alert('Please enter a valid URL');
 
         if (action === 'analyze') {
-            // Single site analysis
-            const targetUrl = userUrlInput.value.trim();
-            if (!targetUrl) {
-                alert('Please enter a valid URL');
-                return;
-            }
-
-            // Show loading state
-            resultsContainer.innerHTML = '<p>Analyzing website...</p>';
-
+            // Immediate Traffic Analysis
+            setViewState('active');
+            
+            // Show loading in metrics/chart only? 
+            // For now, we assume fast response. 
+            // Ideally we'd show a mini-loader in the chart area.
+            
             try {
-                // Call the backend API
-                const response = await fetch('/analyze', {
+                const res = await fetch('/analyze', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ url: targetUrl })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ url: userUrl })
                 });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    displayResults(data);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    renderDashboard(data, 'single');
                 } else {
-                    const error = await response.json();
-                    resultsContainer.innerHTML = `<p>Error: ${error.error}</p>`;
+                    const err = await res.json();
+                    alert(`Error: ${err.error}`);
                 }
-            } catch (error) {
-                resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+            } catch (err) {
+                alert(`Connection Error: ${err.message}`);
             }
+
         } else if (action === 'generate-plan') {
-            // Competitor analysis
-            const userUrl = userUrlInput.value.trim();
-            const competitorUrl = competitorUrlInput.value.trim();
+            // Strategic Analysis
+            const compUrl = competitorUrlInput.value.trim();
+            if (!compUrl) return alert('Please enter a Competitor URL for AI Analysis');
 
-            if (!userUrl || !competitorUrl) {
-                alert('Please enter both your website URL and competitor URL');
-                return;
-            }
-
-            // Show loading state
-            resultsContainer.innerHTML = '<p>Generating SEO plan...</p>';
+            setViewState('active');
+            toggleAiLoading(true);
 
             try {
-                // Call the backend API for generating plan
-                const response = await fetch('/generate-plan', {
+                const res = await fetch('/generate-plan', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ userUrl: userUrl, competitorUrl: competitorUrl })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ userUrl, competitorUrl: compUrl })
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    displayAIPlan(data);
+                if (res.ok) {
+                    const data = await res.json();
+                    renderDashboard(data, 'full');
                 } else {
-                    const error = await response.json();
-                    resultsContainer.innerHTML = `<p>Error: ${error.error}</p>`;
+                    const err = await res.json();
+                    alert(`AI Error: ${err.error}`);
                 }
-            } catch (error) {
-                resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+            } catch (err) {
+                alert(`Connection Error: ${err.message}`);
+            } finally {
+                toggleAiLoading(false);
             }
         }
     });
 
-    // Function to display analysis results for single site
-    function displayResults(data) {
-        // Destroy previous charts
-        if (userChart) userChart.destroy();
-        if (competitorChart) competitorChart.destroy();
-        document.querySelector('.chart-container').style.display = 'none'; // Hide by default
+    // --- Rendering Logic ---
 
-        // Create chart for single analysis
-        if (data.links && Object.values(data.links).some(arr => arr.length > 0)) {
-            document.querySelector('.chart-container').style.display = 'flex';
-            // Hide competitor chart wrapper and show user chart wrapper
-            const competitorChartWrapper = document.querySelector('#competitorLinkChart').closest('.chart-wrapper');
-            const userChartWrapper = document.querySelector('#userLinkChart').closest('.chart-wrapper');
+    function renderDashboard(data, mode) {
+        // 1. Chart Rendering
+        // Ensure we handle both single and comparison data structures
+        const chartData = data.chartData; 
+        
+        if (chartData) {
+            renderChart(chartData, mode);
+        }
 
-            if (competitorChartWrapper) competitorChartWrapper.style.display = 'none';
-            if (userChartWrapper) userChartWrapper.style.display = 'block';
-            userChart = createLinkChart('userLinkChart', data.links, 'Your Site Link Distribution');
+        // 2. Metrics Cards
+        renderMetrics(data, mode);
+
+        // 3. AI Plan (Only for 'full' mode)
+        if (mode === 'full') {
+            renderAiPlan(data.aiPlan, data.rawPlan);
         } else {
-            // Hide the chart container if no data
-            document.querySelector('.chart-container').style.display = 'none';
-        }
-
-        // Clear previous results
-        resultsContainer.innerHTML = '';
-
-        // Display links data
-        if (data.links) {
-            const linksSection = document.createElement('div');
-            linksSection.innerHTML = '<h3>Links Analysis</h3>';
-
-            for (const [category, links] of Object.entries(data.links)) {
-                if (links.length > 0) {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.innerHTML = `<h4>${category.charAt(0).toUpperCase() + category.slice(1)} Links (${links.length})</h4>`;
-
-                    const linksList = document.createElement('ul');
-                    links.forEach(link => {
-                        const listItem = document.createElement('li');
-                        if (typeof link === 'object' && link.url) {
-                            listItem.innerHTML = `<a href="${link.url}" target="_blank">${link.url}</a> - Anchor: "${link.anchorText || 'N/A'}"`;
-                        } else {
-                            listItem.innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
-                        }
-                        linksList.appendChild(listItem);
-                    });
-
-                    categoryDiv.appendChild(linksList);
-                    linksSection.appendChild(categoryDiv);
-                }
-            }
-
-            resultsContainer.appendChild(linksSection);
-        }
-
-        // Display images data
-        if (data.images && data.images.length > 0) {
-            const imagesSection = document.createElement('div');
-            imagesSection.innerHTML = '<h3>Images Analysis</h3><ul>';
-
-            data.images.forEach(img => {
-                const imgItem = document.createElement('li');
-                imgItem.innerHTML = `Source: <a href="${img.src}" target="_blank">${img.src}</a> - Alt: "${img.alt || 'N/A'}"`;
-                imagesSection.appendChild(imgItem);
-            });
-
-            imagesSection.innerHTML += '</ul>';
-            resultsContainer.appendChild(imagesSection);
-        }
-
-        if (!data.links && !data.images) {
-            resultsContainer.innerHTML = '<p>No links or images found on the page.</p>';
+            // Reset AI panel for single view
+            aiPlanContent.innerHTML = `
+                <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-3">
+                    <i class="fas fa-lock text-2xl opacity-20"></i>
+                    <p class="text-xs">Add a competitor to unlock AI insights.</p>
+                </div>
+            `;
+            currentRawPlan = "";
         }
     }
 
-    // Function to display AI plan results
-    function displayAIPlan(data) {
-        // Destroy previous charts
-        if (userChart) userChart.destroy();
-        if (competitorChart) competitorChart.destroy();
-        document.querySelector('.chart-container').style.display = 'none'; // Hide by default
+    function renderChart(data, mode) {
+        const ctx = document.getElementById('mainChart');
+        if (!ctx) return;
+        
+        if (chartInstance) chartInstance.destroy();
 
-        // Create charts for comparison
-        if (data.userAnalysis || data.competitorAnalysis) {
-            document.querySelector('.chart-container').style.display = 'flex';
+        // Config for Single vs Comparison
+        const datasets = [];
+        
+        // Dataset 1: User (Always present)
+        // Check if data structure differs. 
+        // For '/analyze', we might send 'counts'. For '/generate-plan', we send 'userValues' & 'compValues'.
+        
+        const labels = data.labels || ["Internal", "External", "Images", "Social"];
+        const userValues = data.counts || data.userValues || [];
+        const compValues = data.compValues || [];
 
-            // Ensure both chart containers are visible
-            const userChartWrapper = document.querySelector('#userLinkChart').closest('.chart-wrapper');
-            const competitorChartWrapper = document.querySelector('#competitorLinkChart').closest('.chart-wrapper');
+        datasets.push({
+            label: 'You',
+            data: userValues,
+            backgroundColor: '#10b981', // Emerald-500
+            borderRadius: 4,
+            barPercentage: 0.6,
+            categoryPercentage: 0.8
+        });
 
-            if (userChartWrapper) userChartWrapper.style.display = 'block';
-            if (competitorChartWrapper) competitorChartWrapper.style.display = 'block';
-
-            // Create user chart if user analysis exists
-            if (data.userAnalysis && data.userAnalysis.links) {
-                userChart = createLinkChart('userLinkChart', data.userAnalysis.links, 'Your Site Link Distribution');
-            }
-
-            // Create competitor chart if competitor analysis exists
-            if (data.competitorAnalysis && data.competitorAnalysis.links) {
-                competitorChart = createLinkChart('competitorLinkChart', data.competitorAnalysis.links, 'Competitor Site Link Distribution');
-            }
-        }
-
-        // Clear previous results
-        resultsContainer.innerHTML = '';
-
-        // Display the AI-generated plan
-        if (data.aiPlan) {
-            const planSection = document.createElement('div');
-            planSection.classList.add('ai-plan-section');
-            planSection.innerHTML = '<h3>AI-Powered SEO Recommendations</h3>';
-
-            // Convert the plan text to HTML with proper formatting
-            const planContent = document.createElement('div');
-            planContent.classList.add('ai-plan-content');
-
-            // Split the plan by newlines to create paragraphs
-            const planItems = data.aiPlan.split('\n');
-            const list = document.createElement('ol');
-
-            planItems.forEach(item => {
-                if (item.trim() !== '') {
-                    const listItem = document.createElement('li');
-
-                    // Process the item to handle markdown-like formatting
-                    let processedItem = item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-                    listItem.innerHTML = processedItem.trim();
-                    list.appendChild(listItem);
-                }
+        if (mode === 'full' && compValues.length > 0) {
+            datasets.push({
+                label: 'Competitor',
+                data: compValues,
+                backgroundColor: '#f59e0b', // Amber-500
+                borderRadius: 4,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8
             });
-
-            planContent.appendChild(list);
-            planSection.appendChild(planContent);
-            resultsContainer.appendChild(planSection);
         }
 
-        // Optionally display user and competitor analysis data as well
-        if (data.userAnalysis || data.competitorAnalysis) {
-            const comparisonSection = document.createElement('div');
-            comparisonSection.classList.add('comparison-section');
-            comparisonSection.innerHTML = '<h3>Site Comparisons</h3>';
+        // Update Legend HTML
+        let legendHtml = `<div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div><span class="text-zinc-400 text-xs">You</span></div>`;
+        if (mode === 'full') {
+            legendHtml += `<div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-amber-500"></div><span class="text-zinc-400 text-xs">Competitor</span></div>`;
+        }
+        chartLegend.innerHTML = legendHtml;
 
-            if (data.userAnalysis) {
-                const userSection = document.createElement('div');
-                userSection.innerHTML = '<h4>Your Site Analysis</h4>';
-                if (data.userAnalysis.links) {
-                    for (const [category, links] of Object.entries(data.userAnalysis.links)) {
-                        if (links.length > 0) {
-                            const categoryDiv = document.createElement('div');
-                            categoryDiv.innerHTML = `<h5>${category.charAt(0).toUpperCase() + category.slice(1)} Links (${links.length} found)</h5>`;
-                            userSection.appendChild(categoryDiv);
-                        }
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 1000, easing: 'easeOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(24, 24, 27, 0.9)',
+                        titleColor: '#f4f4f5',
+                        bodyColor: '#a1a1aa',
+                        borderColor: '#3f3f46',
+                        borderWidth: 1,
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: true
                     }
-                }
-                if (data.userAnalysis.images) {
-                    const imagesDiv = document.createElement('div');
-                    imagesDiv.innerHTML = `<h5>Images (${data.userAnalysis.images.length} found)</h5>`;
-                    userSection.appendChild(imagesDiv);
-                }
-                comparisonSection.appendChild(userSection);
-            }
-
-            if (data.competitorAnalysis) {
-                const competitorSection = document.createElement('div');
-                competitorSection.innerHTML = '<h4>Competitor Site Analysis</h4>';
-                if (data.competitorAnalysis.links) {
-                    for (const [category, links] of Object.entries(data.competitorAnalysis.links)) {
-                        if (links.length > 0) {
-                            const categoryDiv = document.createElement('div');
-                            categoryDiv.innerHTML = `<h5>${category.charAt(0).toUpperCase() + category.slice(1)} Links (${links.length} found)</h5>`;
-                            competitorSection.appendChild(categoryDiv);
-                        }
-                    }
-                }
-                if (data.competitorAnalysis.images) {
-                    const imagesDiv = document.createElement('div');
-                    imagesDiv.innerHTML = `<h5>Images (${data.competitorAnalysis.images.length} found)</h5>`;
-                    competitorSection.appendChild(imagesDiv);
-                }
-                // Add the fully constructed competitor section to the main comparison container
-                comparisonSection.appendChild(competitorSection);
-            }
-
-            resultsContainer.appendChild(comparisonSection);
-        }
-    }
-
-    function createLinkChart(canvasId, linksData, chartTitle) {
-        const labels = [];
-        const counts = [];
-        if (linksData) {
-            for (const [category, links] of Object.entries(linksData)) {
-                labels.push(category.charAt(0).toUpperCase() + category.slice(1));
-                counts.push(links.length);
-            }
-        }
-
-        // Only create chart if we have data
-        if (labels.length > 0 && counts.some(count => count > 0)) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            return new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Link Count',
-                        data: counts,
-                        backgroundColor: [
-                            'rgba(54, 162, 235, 0.7)',
-                            'rgba(255, 99, 132, 0.7)',
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)',
-                            'rgba(153, 102, 255, 0.7)'
-                        ],
-                        borderWidth: 1
-                    }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: chartTitle
-                        },
-                        legend: {
-                            position: 'bottom'
-                        }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#27272a' },
+                        ticks: { color: '#71717a', font: { size: 10, family: 'Inter' } },
+                        border: { display: false }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#71717a', font: { size: 10, family: 'Inter' } },
+                        border: { display: false }
                     }
                 }
-            });
-        }
-        return null; // Return null if no valid data
+            }
+        });
     }
+
+    function renderMetrics(data, mode) {
+        // Extract meta data safely
+        const userMeta = mode === 'full' ? data.userAnalysis.meta : data.meta;
+        const compMeta = mode === 'full' ? data.competitorAnalysis.meta : null;
+
+        const createCard = (title, meta, color) => `
+            <div class="bg-zinc-900/40 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors">
+                <h4 class="text-[10px] font-bold ${color} uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fas fa-circle text-[6px]"></i> ${title}
+                </h4>
+                <div>
+                    <div class="text-xs text-zinc-500 mb-1">Page Title</div>
+                    <div class="text-sm text-zinc-200 font-medium truncate" title="${meta?.title || ''}">
+                        ${meta?.title || 'N/A'}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let html = createCard('Target URL', userMeta, 'text-emerald-500');
+        if (compMeta) {
+            html += createCard('Competitor URL', compMeta, 'text-amber-500');
+        }
+
+        metricsGrid.innerHTML = html;
+    }
+
+    function renderAiPlan(planText, rawText) {
+        currentRawPlan = rawText || "";
+        
+        // Parse Markdown-like structure
+        // Looking for headers, lists, etc.
+        const lines = planText.split('\n');
+        let html = '';
+        
+        lines.forEach(line => {
+            const t = line.trim();
+            if (!t) return;
+
+            // Headers (Rocket, Shield, Bulb)
+            if (t.includes('🚀') || t.includes('🛡️') || t.includes('💡') || t.startsWith('###')) {
+                const cleanTitle = t.replace(/#/g, '').trim();
+                html += `
+                    <div class="mt-6 first:mt-2 mb-3 pb-2 border-b border-zinc-800">
+                        <h4 class="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                            ${cleanTitle}
+                        </h4>
+                    </div>
+                `;
+            } 
+            // List Items
+            else if (t.startsWith('- ') || t.startsWith('* ') || t.match(/^\d+\./)) {
+                // Highlight bold text **text**
+                const content = t.replace(/^[-*]\s|^\d+\.\s/, '').replace(/\*\*(.*?)\*\*/g, '<span class="text-emerald-400 font-medium">$1</span>');
+                html += `
+                    <div class="flex gap-3 mb-3 pl-1 group">
+                        <div class="min-w-[4px] h-[4px] mt-2 rounded-full bg-zinc-700 group-hover:bg-emerald-500 transition-colors"></div>
+                        <p class="text-xs leading-relaxed text-zinc-400 group-hover:text-zinc-300 transition-colors">${content}</p>
+                    </div>
+                `;
+            }
+            // Fallback Paragraph
+            else {
+                 html += `<p class="text-xs text-zinc-500 mb-2">${t}</p>`;
+            }
+        });
+
+        aiPlanContent.innerHTML = html;
+    }
+
+    // --- Copy Logic ---
+    copyPlanBtn.addEventListener('click', () => {
+        if (!currentRawPlan) return;
+        navigator.clipboard.writeText(currentRawPlan).then(() => {
+            const original = copyPlanBtn.innerHTML;
+            copyPlanBtn.innerHTML = `<i class="fas fa-check text-emerald-500"></i> <span class="text-emerald-500">Copied</span>`;
+            setTimeout(() => {
+                copyPlanBtn.innerHTML = original;
+            }, 2000);
+        });
+    });
+
 });

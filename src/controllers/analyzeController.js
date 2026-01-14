@@ -9,7 +9,19 @@ const analyzeUrl = async (req, res) => {
 
     try {
         const analysis = await analysisService.analyzeUrl(targetUrl);
-        res.json(analysis);
+        
+        // Generate Single Site Chart Data
+        const chartData = {
+            labels: ["Internal", "External", "Images", "Social"],
+            counts: [
+                analysis.links.internal.length,
+                analysis.links.external.length,
+                analysis.images.length,
+                analysis.links.social.length
+            ]
+        };
+
+        res.json({ ...analysis, chartData });
     } catch (error) {
         console.error('Error analyzing URL:', error);
         res.status(500).json({ error: 'Failed to analyze the URL. It may be invalid, unreachable, or blocking our bot.' });
@@ -28,10 +40,29 @@ const generatePlan = async (req, res) => {
         const competitorAnalysis = await analysisService.analyzeUrl(competitorUrl);
         const aiPlan = await aiService.generateSeoPlan(userAnalysis, competitorAnalysis);
 
+        // Generate Chart Data Schema
+        const chartData = {
+            labels: ["Internal Links", "External Links", "Images", "Social"],
+            userValues: [
+                userAnalysis.links.internal.length,
+                userAnalysis.links.external.length,
+                userAnalysis.images.length,
+                userAnalysis.links.social.length
+            ],
+            compValues: [
+                competitorAnalysis.links.internal.length,
+                competitorAnalysis.links.external.length,
+                competitorAnalysis.images.length,
+                competitorAnalysis.links.social.length
+            ]
+        };
+
         res.json({
             userAnalysis,
             competitorAnalysis,
-            aiPlan
+            aiPlan,
+            rawPlan: aiPlan,
+            chartData
         });
     } catch (error) {
         console.error('Error generating SEO plan:', error);
@@ -39,7 +70,27 @@ const generatePlan = async (req, res) => {
     }
 };
 
+const getLlamaInsights = async (req, res) => {
+    const { userAnalysis, competitorAnalysis } = req.body;
+
+    if (!userAnalysis || !competitorAnalysis) {
+        return res.status(400).json({ error: 'Both userAnalysis and competitorAnalysis are required' });
+    }
+
+    try {
+        const aiPlan = await aiService.generateSeoPlan(userAnalysis, competitorAnalysis);
+
+        res.json({
+            aiPlan
+        });
+    } catch (error) {
+        console.error('Error generating Llama insights:', error);
+        res.status(500).json({ error: 'Failed to generate Llama insights.' });
+    }
+};
+
 module.exports = {
     analyzeUrl,
-    generatePlan
+    generatePlan,
+    getLlamaInsights
 };
